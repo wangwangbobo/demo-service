@@ -59,11 +59,10 @@ jobs:
           echo "Deployment completed!"
           """
           
-          # 签名参数
-          params = {
+          # API 参数（AccessKeyId 需要单独处理）
+          api_params = {
               'Action': 'InvokeCommand',
               'Version': '2014-05-26',
-              'AccessKeyId': AK_ID,
               'SignatureMethod': 'HMAC-SHA1',
               'SignatureVersion': '1.0',
               'SignatureNonce': str(uuid.uuid4()),
@@ -74,11 +73,12 @@ jobs:
               'CommandContent': base64.b64encode(COMMAND.encode()).decode(),
               'InstanceId.1': INSTANCE_ID,
               'Name': 'demo-service-deploy',
-              'Timed': 'false'
+              'Timed': 'false',
+              'AccessKeyId': AK_ID  # AccessKeyId 也要参与签名
           }
           
           # 生成签名
-          sorted_params = '&'.join([f"{k}={urllib.parse.quote(str(v), safe='')}" for k, v in sorted(params.items())])
+          sorted_params = '&'.join([f"{k}={urllib.parse.quote(str(v), safe='')}" for k, v in sorted(api_params.items())])
           string_to_sign = f"GET&%2F&{urllib.parse.quote(sorted_params, safe='')}"
           signature = base64.b64encode(hmac.new((AK_SECRET + '&').encode(), string_to_sign.encode(), hashlib.sha1).digest()).decode()
           
