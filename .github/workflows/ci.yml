@@ -7,8 +7,8 @@ on:
     branches: [main, master]
 
 env:
-  REGISTRY: ${{ secrets.ACR_REGISTRY }}  # 例如：openclaw-registry.cn-hangzhou.cr.aliyuncs.com
-  IMAGE_NAME: demo-service  # ACR 仓库名（需要在 ACR 控制台先创建）
+  REGISTRY: ${{ secrets.ACR_REGISTRY }}  # openclaw-registry.cn-hangzhou.cr.aliyuncs.com
+  IMAGE_NAME: openclaw/demo-service  # 命名空间/仓库名
 
 jobs:
   test:
