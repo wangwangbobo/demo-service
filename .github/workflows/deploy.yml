@@ -25,15 +25,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure Aliyun CLI
+      - name: Install Aliyun CLI
         run: |
+          # 下载并安装阿里云 CLI
+          curl -LO https://aliyuncli.oss-cn-hangzhou.aliyuncs.com/aliyun-cli-linux-3.3.4-amd64.tgz
+          tar -xzf aliyun-cli-linux-3.3.4-amd64.tgz
+          sudo mv aliyun /usr/local/bin/
+          rm aliyun-cli-linux-3.3.4-amd64.tgz
+          
+          # 配置认证
           aliyun configure set \
             --access-key-id "${{ secrets.ALIYUN_AK_ID }}" \
             --access-key-secret "${{ secrets.ALIYUN_AK_SECRET }}" \
             --region "${{ secrets.ALIYUN_REGION }}" \
             --mode AK \
             --profile default
-          echo "Aliyun CLI configured successfully"
+          
+          echo "✅ Aliyun CLI installed and configured"
           aliyun version
 
       - name: Get latest image tag
