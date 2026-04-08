@@ -8,10 +8,12 @@ on:
     branches: [main, master]
 
 env:
-  REGION_ID: ${{ secrets.ALIYUN_REGION }}  # 例如：cn-hangzhou
+  REGION_ID: ${{ secrets.ALIYUN_REGION }}  # cn-hangzhou
   INSTANCE_ID: ${{ secrets.ECS_INSTANCE_ID }}
   ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}
-  IMAGE_NAME: ${{ github.repository }}
+  ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+  ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+  IMAGE_NAME: openclaw/demo-service  # ACR 仓库路径
 
 jobs:
   deploy:
@@ -23,12 +25,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Aliyun CLI
-        uses: aliyun/aliyun-cli-action@v1
-        with:
-          access-key-id: ${{ secrets.ALIYUN_AK_ID }}
-          access-key-secret: ${{ secrets.ALIYUN_AK_SECRET }}
-          region-id: ${{ env.REGION_ID }}
+      - name: Configure Aliyun CLI
+        run: |
+          aliyun configure set \
+            --access-key-id "${{ secrets.ALIYUN_AK_ID }}" \
+            --access-key-secret "${{ secrets.ALIYUN_AK_SECRET }}" \
+            --region "${{ secrets.ALIYUN_REGION }}" \
+            --mode AK \
+            --profile default
+          echo "Aliyun CLI configured successfully"
+          aliyun version
 
       - name: Get latest image tag
         id: image
