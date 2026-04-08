@@ -25,34 +25,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Aliyun CLI
-        run: |
-          # 使用官方安装脚本
-          curl -fsSL https://aliyuncli.oss-cn-hangzhou.aliyuncs.com/aliyun-cli-linux-latest-amd64.tgz -o aliyun.tgz
-          if [ -f aliyun.tgz ]; then
-            tar -xzf aliyun.tgz 2>/dev/null || tar -xf aliyun.tgz
-            sudo mv aliyun /usr/local/bin/ 2>/dev/null || true
-          fi
-          
-          # 如果下载失败，尝试用 apt 安装
-          if ! command -v aliyun &> /dev/null; then
-            echo "Downloading fallback..."
-            wget -q https://aliyuncli.oss-cn-hangzhou.aliyuncs.com/aliyun-cli-linux-3.3.4-amd64.tgz -O /tmp/ali.tgz || true
-            if [ -f /tmp/ali.tgz ]; then
-              cd /tmp && tar -xzf ali.tgz && sudo mv aliyun /usr/local/bin/
-            fi
-          fi
-          
-          # 配置认证
-          aliyun configure set \
-            --access-key-id "${{ secrets.ALIYUN_AK_ID }}" \
-            --access-key-secret "${{ secrets.ALIYUN_AK_SECRET }}" \
-            --region "${{ secrets.ALIYUN_REGION }}" \
-            --mode AK \
-            --profile default
-          
-          echo "✅ Aliyun CLI installed and configured"
-          which aliyun && aliyun version
+      - name: Deploy via Cloud Assistant
+        uses: freevm/ecscmd-action@v1
+        with:
+          access-key-id: ${{ secrets.ALIYUN_AK_ID }}
+          access-key-secret: ${{ secrets.ALIYUN_AK_SECRET }}
+          region-id: ${{ secrets.ALIYUN_REGION }}
+          instance-id: ${{ secrets.ECS_INSTANCE_ID }}
+          command: |
+            #!/bin/bash
+            set -e
+            IMAGE="${{ secrets.ACR_REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}"
+            echo "Deploying $IMAGE..."
+            docker login -u "${{ secrets.ACR_USERNAME }}" -p "${{ secrets.ACR_PASSWORD }}" "${{ secrets.ACR_REGISTRY }}"
+            docker pull "$IMAGE"
+            docker stop demo-service 2>/dev/null || true
+            docker rm demo-service 2>/dev/null || true
+            docker run -d --name demo-service -p 5000:5000 --restart unless-stopped -e APP_VERSION="sha-${{ github.sha }}" "$IMAGE"
+            echo "✅ Deployment completed!"
 
       - name: Get latest image tag
         id: image
