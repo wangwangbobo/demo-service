@@ -27,11 +27,21 @@ jobs:
 
       - name: Install Aliyun CLI
         run: |
-          # 下载并安装阿里云 CLI
-          curl -LO https://aliyuncli.oss-cn-hangzhou.aliyuncs.com/aliyun-cli-linux-3.3.4-amd64.tgz
-          tar -xzf aliyun-cli-linux-3.3.4-amd64.tgz
-          sudo mv aliyun /usr/local/bin/
-          rm aliyun-cli-linux-3.3.4-amd64.tgz
+          # 使用官方安装脚本
+          curl -fsSL https://aliyuncli.oss-cn-hangzhou.aliyuncs.com/aliyun-cli-linux-latest-amd64.tgz -o aliyun.tgz
+          if [ -f aliyun.tgz ]; then
+            tar -xzf aliyun.tgz 2>/dev/null || tar -xf aliyun.tgz
+            sudo mv aliyun /usr/local/bin/ 2>/dev/null || true
+          fi
+          
+          # 如果下载失败，尝试用 apt 安装
+          if ! command -v aliyun &> /dev/null; then
+            echo "Downloading fallback..."
+            wget -q https://aliyuncli.oss-cn-hangzhou.aliyuncs.com/aliyun-cli-linux-3.3.4-amd64.tgz -O /tmp/ali.tgz || true
+            if [ -f /tmp/ali.tgz ]; then
+              cd /tmp && tar -xzf ali.tgz && sudo mv aliyun /usr/local/bin/
+            fi
+          fi
           
           # 配置认证
           aliyun configure set \
@@ -42,7 +52,7 @@ jobs:
             --profile default
           
           echo "✅ Aliyun CLI installed and configured"
-          aliyun version
+          which aliyun && aliyun version
 
       - name: Get latest image tag
         id: image
