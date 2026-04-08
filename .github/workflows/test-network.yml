@@ -1,0 +1,75 @@
+name: Test Network
+
+on: workflow_dispatch
+
+jobs:
+  test-network:
+    name: Test Network Connectivity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test DNS
+        run: |
+          echo "=== Testing DNS Resolution ==="
+          nslookup ecs.aliyuncs.com || echo "nslookup failed"
+          dig ecs.aliyuncs.com || echo "dig failed"
+          
+      - name: Test HTTPS Connection
+        run: |
+          echo "=== Testing HTTPS Connection ==="
+          curl -vI https://ecs.aliyuncs.com/ 2>&1 | head -20
+          
+      - name: Test Python requests
+        run: |
+          echo "=== Testing Python requests ==="
+          python3 -c "
+          import requests
+          try:
+              r = requests.get('https://ecs.aliyuncs.com/', timeout=10)
+              print(f'Status: {r.status_code}')
+              print(f'Response: {r.text[:200]}')
+          except Exception as e:
+              print(f'Error: {e}')
+          "
+          
+      - name: Test Aliyun API with Signature
+        run: |
+          echo "=== Testing Aliyun API ==="
+          python3 << 'EOF'
+          import requests
+          import hmac
+          import hashlib
+          import base64
+          import urllib.parse
+          import uuid
+          from datetime import datetime
+          
+          AK_ID = "${{ secrets.ALIYUN_AK_ID }}"
+          AK_SECRET = "${{ secrets.ALIYUN_AK_SECRET }}"
+          REGION = "${{ secrets.ALIYUN_REGION }}"
+          
+          params = {
+              'Action': 'DescribeRegions',
+              'Version': '2014-05-26',
+              'AccessKeyId': AK_ID,
+              'SignatureMethod': 'HMAC-SHA1',
+              'SignatureVersion': '1.0',
+              'SignatureNonce': str(uuid.uuid4()),
+              'Timestamp': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+              'Format': 'JSON',
+              'RegionId': REGION
+          }
+          
+          sorted_params = '&'.join([f"{k}={urllib.parse.quote(str(v), safe='')}" for k, v in sorted(params.items())])
+          string_to_sign = f"GET&%2F&{urllib.parse.quote(sorted_params, safe='')}"
+          signature = base64.b64encode(hmac.new((AK_SECRET + '&').encode(), string_to_sign.encode(), hashlib.sha1).digest()).decode()
+          
+          url = f"https://ecs.aliyuncs.com/?Signature={urllib.parse.quote(signature)}&{sorted_params}"
+          print(f"URL: {url[:100]}...")
+          
+          try:
+              response = requests.get(url, timeout=10)
+              print(f"Status: {response.status_code}")
+              print(f"Response: {response.text[:500]}")
+          except Exception as e:
+              print(f"ERROR: {e}")
+          EOF
