@@ -1,0 +1,100 @@
+name: CD - Deploy to ECS via Cloud Assistant
+
+on:
+  workflow_run:
+    workflows: ["CI - Build and Push to ACR"]
+    types:
+      - completed
+    branches: [main, master]
+
+env:
+  REGION_ID: ${{ secrets.ALIYUN_REGION }}  # 例如：cn-hangzhou
+  INSTANCE_ID: ${{ secrets.ECS_INSTANCE_ID }}
+  ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  deploy:
+    name: Deploy to ECS
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Aliyun CLI
+        uses: aliyun/aliyun-cli-action@v1
+        with:
+          access-key-id: ${{ secrets.ALIYUN_AK_ID }}
+          access-key-secret: ${{ secrets.ALIYUN_AK_SECRET }}
+          region-id: ${{ env.REGION_ID }}
+
+      - name: Get latest image tag
+        id: image
+        run: |
+          TAG="sha-${{ github.sha }}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Full image: ${{ env.ACR_REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG"
+
+      - name: Deploy via Cloud Assistant
+        run: |
+          # 创建云助手命令
+          COMMAND_CONTENT=$(base64 -w0 << 'EOF'
+          #!/bin/bash
+          set -e
+          
+          IMAGE="${ACR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+          CONTAINER_NAME="demo-service"
+          
+          echo "Deploying $IMAGE..."
+          
+          # 登录 ACR
+          docker login -u "${ACR_USERNAME}" -p "${ACR_PASSWORD}" "${ACR_REGISTRY}"
+          
+          # 拉取最新镜像
+          docker pull "$IMAGE"
+          
+          # 停止旧容器
+          docker stop "$CONTAINER_NAME" 2>/dev/null || true
+          docker rm "$CONTAINER_NAME" 2>/dev/null || true
+          
+          # 启动新容器
+          docker run -d \
+            --name "$CONTAINER_NAME" \
+            -p 5000:5000 \
+            --restart unless-stopped \
+            -e ENVIRONMENT=production \
+            -e APP_VERSION="${IMAGE_TAG}" \
+            "$IMAGE"
+          
+          # 清理旧镜像
+          docker image prune -f
+          
+          echo "Deployment completed!"
+          EOF
+          )
+          
+          # 调用云助手 API
+          aliyun ecs InvokeCommand \
+            --RegionId "$REGION_ID" \
+            --Type RunShellScript \
+            --CommandContent "$COMMAND_CONTENT" \
+            --InstanceId.1 "$INSTANCE_ID" \
+            --Name "deploy-demo-service" \
+            --Timed false
+
+      - name: Wait for deployment
+        run: |
+          echo "Waiting for ECS to pull image and start..."
+          sleep 30
+
+      - name: Verify deployment
+        run: |
+          echo "✅ Deployment initiated successfully!"
+          echo "Image: ${{ env.ACR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.image.outputs.tag }}"
+          echo "ECS Instance: ${{ env.INSTANCE_ID }}"
+          echo ""
+          echo "Next steps:"
+          echo "1. Check ECS logs: aliyun ecs DescribeInvocations --RegionId $REGION_ID"
+          echo "2. Verify service: curl http://<ECS-Internal-IP>:5000/health"
