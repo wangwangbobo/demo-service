@@ -1,0 +1,21 @@
+# 已废弃 - 改用 ECS 主动拉取方案
+# ECS 上的 cron 任务会自动检查 ACR 并部署
+# 本文件保留仅供参考
+
+name: CD - Deploy to ECS (DEPRECATED)
+
+on:
+  workflow_run:
+    workflows: ["CI - Build and Push to ACR"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deprecated
+        run: |
+          echo "⚠️  This workflow is deprecated."
+          echo "✅ ECS auto-deploy is now used instead."
+          echo "ECS checks ACR every minute and deploys automatically."
