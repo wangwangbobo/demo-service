@@ -3,7 +3,13 @@ Demo Service 单元测试
 """
 import pytest
 import json
-from src.app import app
+import sys
+import os
+
+# 添加项目根目录到 Python 路径
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+from app import app
 
 @pytest.fixture
 def client():
