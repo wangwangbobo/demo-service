@@ -11,12 +11,12 @@ GitHub Actions CI
     ↓
 构建 Docker 镜像 → 推送到阿里云 ACR
     ↓
-GitHub Actions CD
+ECS 定时任务（每 5 分钟检查）
     ↓
-调用阿里云云助手 API
-    ↓
-内网 ECS 拉取镜像并部署
+发现新镜像 → 自动拉取 → 重启容器
 ```
+
+> 安全优势：AK/SK 不暴露在 GitHub，只存在 ECS 上。
 
 ## 📁 项目结构
 
@@ -25,10 +25,9 @@ demo-service/
 ├── src/
 │   └── app.py              # Flask 应用代码
 ├── .github/workflows/
-│   ├── ci.yml              # CI: 测试 + 构建 + 推送 ACR
-│   └── deploy.yml          # CD: 云助手部署到 ECS
+│   └── ci.yml              # CI: 测试 + 构建 + 推送 ACR
 ├── deploy/
-│   └── cloud-assistant.sh  # 本地部署脚本
+│   └── check-and-deploy.sh # ECS 定时检查脚本（待部署）
 ├── Dockerfile
 ├── docker-compose.yml
 ├── requirements.txt
@@ -88,16 +87,8 @@ docker stop demo && docker rm demo
 | `ACR_REGISTRY` | ACR 注册地址 | `github-cicd-registry.cn-hangzhou.cr.aliyuncs.com` |
 | `ACR_USERNAME` | ACR 用户名 | `yicheng.wb@computenest` |
 | `ACR_PASSWORD` | ACR 密码（开通时设置的密码） | `xxx-xxx-xxx` |
-| `ALIYUN_AK_ID` | 阿里云 AccessKey ID | `LTAI5t...` |
-| `ALIYUN_AK_SECRET` | 阿里云 AccessKey Secret | `xxx-xxx-xxx` |
-| `ALIYUN_REGION` | ECS 地域 | `cn-hangzhou` |
-| `ECS_INSTANCE_ID` | ECS 实例 ID | `i-bp1234567890` |
 
-### 3. 获取 AccessKey
-
-```bash
-# 方法 1: 阿里云控制台 → RAM 访问控制 → 创建用户 → 获取 AK
-# 方法 2: 使用已有账号的 AK（不推荐生产环境）
+> 注意：不需要配置阿里云 AK/SK，部署由 ECS 定时拉取镜像完成。
 ```
 
 ### 4. 获取 ECS Instance ID
