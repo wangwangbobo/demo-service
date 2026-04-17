@@ -85,9 +85,9 @@ docker stop demo && docker rm demo
 
 | Secret | 说明 | 示例 |
 |--------|------|------|
-| `ACR_REGISTRY` | ACR 注册地址 | `registry.cn-hangzhou.aliyuncs.com` |
-| `ACR_USERNAME` | ACR 用户名 | `your-aliyun-account` |
-| `ACR_PASSWORD` | ACR 密码 | `xxx-xxx-xxx` |
+| `ACR_REGISTRY` | ACR 注册地址 | `github-cicd-registry.cn-hangzhou.cr.aliyuncs.com` |
+| `ACR_USERNAME` | ACR 用户名 | `yicheng.wb@computenest` |
+| `ACR_PASSWORD` | ACR 密码（开通时设置的密码） | `xxx-xxx-xxx` |
 | `ALIYUN_AK_ID` | 阿里云 AccessKey ID | `LTAI5t...` |
 | `ALIYUN_AK_SECRET` | 阿里云 AccessKey Secret | `xxx-xxx-xxx` |
 | `ALIYUN_REGION` | ECS 地域 | `cn-hangzhou` |
