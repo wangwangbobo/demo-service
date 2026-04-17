@@ -28,8 +28,10 @@ jobs:
           pip install -r requirements.txt
           pip install pytest
 
-      - name: Run tests (placeholder)
-        run: echo "No tests yet - add your tests here!"
+      - name: Run tests
+        run: |
+          pip install pytest
+          pytest tests/ -v --tb=short
 
   build-and-push:
     name: Build and Push to ACR

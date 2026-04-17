@@ -48,6 +48,10 @@ python src/app.py
 
 # 3. 访问服务
 curl http://localhost:5000/health
+
+# 4. 运行测试
+pip install pytest
+pytest tests/ -v
 ```
 
 ### Docker 本地测试
