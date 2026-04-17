@@ -37,7 +37,7 @@ jobs:
     name: Build and Push to ACR
     runs-on: ubuntu-latest
     needs: test
-    if: github.event_name == 'push' && secrets.ACR_REGISTRY != ''
+    if: github.event_name == 'push'
     
     steps:
       - name: Checkout code
