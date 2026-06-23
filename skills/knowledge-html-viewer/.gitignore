@@ -1,8 +1,7 @@
-# Output
-~/Desktop/html/
-*.html
-*.md
-!templates/*.html
+# Generated output from this skill (do NOT track user-generated docs)
+output/
+build/
+dist/
 
 # Python
 __pycache__/
