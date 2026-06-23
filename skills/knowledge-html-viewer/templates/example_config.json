@@ -1,0 +1,37 @@
+{
+    "name": "示例知识库",
+    "items": [
+        {
+            "name": "项目概述",
+            "is_dir": true,
+            "items": [
+                {
+                    "name": "简介",
+                    "content": "# 项目简介\n\n这是一个示例项目，用于演示知识库 HTML 生成器的功能。\n\n## 主要特性\n\n- 支持 **Markdown** 格式转换\n- 自动生成目录\n- 代码高亮显示\n- 响应式布局\n\n## 快速开始\n\n```python\ndef hello_world():\n    \"\"\"打印问候语\"\"\"\n    print(\"Hello, World!\")\n    return True\n\nif __name__ == \"__main__\":\n    hello_world()\n```\n\n> 注意：请确保已安装 Python 3.8 或更高版本。"
+                },
+                {
+                    "name": "架构设计",
+                    "content": "# 系统架构\n\n## 整体架构\n\n系统采用分层架构设计：\n\n1. **表现层**：HTML 模板与样式\n2. **业务层**：Markdown 解析与转换\n3. **数据层**：文件读写与目录管理\n\n## 技术栈\n\n| 技术 | 用途 | 版本 |\n|------|------|------|\n| Python | 脚本引擎 | 3.8+ |\n| HTML5 | 页面结构 | - |\n| CSS3 | 样式表 | - |\n| JavaScript | 交互逻辑 | ES6+ |"
+                }
+            ]
+        },
+        {
+            "name": "开发指南",
+            "is_dir": true,
+            "items": [
+                {
+                    "name": "环境配置",
+                    "content": "# 开发环境配置\n\n## 系统要求\n\n- Python 3.8 或更高版本\n- 操作系统：Windows / macOS / Linux\n\n## 安装步骤\n\n### 1. 克隆仓库\n\n```bash\ngit clone https://github.com/example/repo.git\ncd repo\n```\n\n### 2. 创建虚拟环境\n\n```bash\npython -m venv venv\nsource venv/bin/activate  # Linux/macOS\nvenv\\Scripts\\activate     # Windows\n```\n\n### 3. 安装依赖\n\n```bash\npip install -r requirements.txt\n```"
+                },
+                {
+                    "name": "代码规范",
+                    "content": "# 代码规范\n\n## Python 代码风格\n\n遵循 PEP 8 规范，主要包括：\n\n### 命名规范\n\n```python\n# 类名使用 PascalCase\nclass MyClass:\n    pass\n\n# 函数和变量使用 snake_case\ndef my_function():\n    my_variable = 1\n    return my_variable\n\n# 常量使用 UPPER_CASE\nMAX_RETRY_COUNT = 3\n```\n\n### 缩进与空格\n\n```python\n# 使用 4 个空格缩进\ndef example_function(arg1, arg2):\n    if arg1 > arg2:\n        result = arg1 - arg2\n    else:\n        result = arg2 - arg1\n    \n    return result\n```\n\n### 文档字符串\n\n```python\ndef calculate_sum(numbers: list) -> int:\n    \"\"\"\n    计算列表中所有数字的和。\n    \n    Args:\n        numbers: 数字列表\n    \n    Returns:\n        所有数字的和\n    \n    Raises:\n        ValueError: 如果列表为空\n    \"\"\"\n    if not numbers:\n        raise ValueError(\"列表不能为空\")\n    return sum(numbers)\n```"
+                }
+            ]
+        },
+        {
+            "name": "API文档",
+            "content": "# API 接口文档\n\n## 概述\n\n本文档描述了系统提供的核心 API 接口。\n\n## 接口列表\n\n### 1. 生成单页 HTML\n\n**函数签名**\n\n```python\ndef generate_html(\n    title: str,\n    content: str,\n    output_path: str,\n    theme: str = 'light',\n    generate_toc: bool = True\n) -> str:\n```\n\n**参数说明**\n\n| 参数 | 类型 | 必填 | 说明 |\n|------|------|------|------|\n| title | str | 是 | 页面标题 |\n| content | str | 是 | Markdown 内容 |\n| output_path | str | 是 | 输出文件路径 |\n| theme | str | 否 | 主题，默认 'light' |\n| generate_toc | bool | 否 | 是否生成目录 |\n\n**返回值**\n\n返回生成的 HTML 文件路径。\n\n**示例**\n\n```python\nfrom generate_html import generate_html\n\nresult = generate_html(\n    title=\"我的文档\",\n    content=\"# 标题\\n\\n这是正文内容。\",\n    output_path=\"./output/我的文档.html\",\n    theme=\"dark\"\n)\n\nprint(f\"文件已生成: {result}\")\n```"
+        }
+    ]
+}
